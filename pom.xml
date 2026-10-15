@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- The parent manages the versions of the Vidocq artefacts and plugins. -->
+    <parent>
+        <groupId>io.vidocq.runtime</groupId>
+        <artifactId>vidocq-runtime-parent</artifactId>
+        <version>0.4.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.vidocq.tools</groupId>
+    <artifactId>vaadin-on-vidocq</artifactId>
+    <name>Vaadin on Vidocq</name>
+    <description>A Vaadin Flow application on the Vidocq runtime, with Foy as its servlet container.</description>
+
+    <properties>
+        <vaadin.version>25.3.2</vaadin.version>
+        <vidocq.mainModule>io.vidocq.tools.vaadin</vidocq.mainModule>
+        <vidocq.mainClass>io.vidocq.tools.vaadin.App</vidocq.mainClass>
+        <!-- Vaadin looks the application's resources up through its own class loader: it must share the
+             application's layer. -->
+        <vidocq.app.layer>all</vidocq.app.layer>
+        <!-- Production mode, with the precompiled frontend of vaadin-prod-bundle: no Node needed. -->
+        <vidocq.dev.jvmArgs>-Dvaadin.productionMode=true</vidocq.dev.jvmArgs>
+        <vidocq.run.jvmArgs>-Dvaadin.productionMode=true</vidocq.run.jvmArgs>
+        <vidocq.jvmArgs>-Dvaadin.productionMode=true</vidocq.jvmArgs>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>${vaadin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.vidocq.runtime</groupId>
+            <artifactId>vidocq-runtime-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vidocq.runtime.extensions.jakartaee.web</groupId>
+            <artifactId>vidocq-runtime-foy-servlet-extension</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-core</artifactId>
+        </dependency>
+        <!-- The precompiled frontend of the core components. -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-prod-bundle</artifactId>
+            <version>${vaadin.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- append: keep vidocq-runtime-core-codegen, which the parent declares. -->
+                    <annotationProcessorPaths combine.children="append">
+                        <!-- Foy's processors: they also run over the Vaadin jars at vidocq:generate. -->
+                        <path>
+                            <groupId>io.vidocq.runtime.extensions.jakartaee.web</groupId>
+                            <artifactId>vidocq-runtime-foy-servlet-extension-codegen</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>${vaadin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.vidocq.runtime</groupId>
+                <artifactId>vidocq-runtime-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- mvn -Pjlink clean package vidocq:jlink : a self-contained image with its own JDK. -->
+        <profile>
+            <id>jlink</id>
+            <properties>
+                <!-- flow-server and flow-react share com/vaadin/flow/server/frontend/, a split package jlink
+                     refuses: move those files into one module of the image. -->
+                <vidocq.jlink.mergeSharedResources>true</vidocq.jlink.mergeSharedResources>
+                <!-- flow-server's Lookup calls ServiceLoader for types of modules that require it: no legal
+                     descriptor exists. Patch it anyway; Collaboration Engine and LitTemplate then cannot be used. -->
+                <vauban.modularize.forceExplicit>true</vauban.modularize.forceExplicit>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- jlink accepts named modules only, and no Vaadin jar is one. -->
+                    <plugin>
+                        <groupId>io.vidocq.vauban</groupId>
+                        <artifactId>vauban-maven-plugin</artifactId>
+                        <version>${vauban.version}</version>
+                        <executions>
+                            <execution>
+                                <id>modularize</id>
+                                <goals>
+                                    <goal>modularize</goal>
+                                </goals>
+                                <configuration>
+                                    <mode>all-automatic</mode>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <!-- 0.4.0 is not released yet: the snapshot builds come from Maven Central's snapshot repository. -->
+    <repositories>
+        <repository>
+            <id>central-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
