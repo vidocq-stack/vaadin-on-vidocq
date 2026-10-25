@@ -77,8 +77,17 @@
                 <version>${vaadin.version}</version>
                 <executions>
                     <execution>
+                        <id>prepare-frontend</id>
                         <goals>
                             <goal>prepare-frontend</goal>
+                        </goals>
+                    </execution>
+                    <!-- Bound to process-classes, not the default prepare-package: vidocq:run and vidocq:dev never reach
+                         prepare-package, so from an empty target/ they would have no frontend bundle. -->
+                    <execution>
+                        <id>build-frontend</id>
+                        <phase>process-classes</phase>
+                        <goals>
                             <goal>build-frontend</goal>
                         </goals>
                     </execution>
