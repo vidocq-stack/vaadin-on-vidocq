@@ -1,6 +1,4 @@
 module io.vidocq.tools.vaadin {
-    requires io.vidocq.runtime.core;
-    requires io.vidocq.runtime.spi;
     requires io.vidocq.runtime.extensions.jakartaee.web.foy;
     requires io.vidocq.foy.api;
     requires io.vidocq.vauban.api;

@@ -17,6 +17,9 @@ No Node: the frontend comes precompiled from `vaadin-prod-bundle`, and the appli
 
 ## Run it
 
+Build once with `./mvnw clean package` first: `vidocq:dev` and `vidocq:run` neither build the frontend nor process the
+Vaadin jars, so from an empty `target/` the page answers 404 (`dev`) or 500 (`run`).
+
 | Goal | Command | Then |
 |---|---|---|
 | Development, reloaded on every change | `./mvnw vidocq:dev` | http://localhost:8080 |
@@ -31,16 +34,27 @@ The port is set in `src/main/resources/vidocq.properties`.
 - **`vidocq.app.layer=all`** (in `pom.xml`). Vaadin looks the application's resources up, `index.html` first, through
   the class loader that loaded Vaadin. With this setting, the Vaadin jars share the application's layer, as
   `WEB-INF/lib` does in a servlet container. Without it, every request answers 500 with *Unable to find index.html*.
-- **Foy's codegen bundle** on the compiler's `annotationProcessorPaths`. `vidocq:generate` also runs Foy's processors
-  over `flow-server` and `atmosphere-runtime`, so Vaadin's `@WebListener` and `ServletContainerInitializer` classes
-  are registered. The startup report shows `2 enriched (Foy 2)`.
+- **The `generate` execution** of `vidocq-runtime-maven-plugin`. The plugin puts Foy's annotation processors on the
+  compiler's path by itself, and `vidocq:generate` also runs them over `flow-server` and `atmosphere-runtime`, so
+  Vaadin's `@WebListener` and `ServletContainerInitializer` classes are registered. The startup report shows
+  `2 enriched (Foy 2)`.
 - **Production mode** is set once in `pom.xml` for `vidocq:dev`, `vidocq:run` and the `vidocq:package` scripts. The
   `jlink` launcher reads it from `JDK_JAVA_OPTIONS`.
+- **No main class.** The runtime's own main boots the module that `vidocq.mainModule` names, under every goal down to
+  the `jlink` image.
+
+## An app shell
+
+A theme, stylesheets or PWA settings mean an `AppShellConfigurator`. In a `jlink` image, Vaadin looks it up through
+`ServiceLoader` from `flow.server`, which the image cannot allow: the first request then never answers. Add
+`vidocq-runtime-vaadin-extension` and `requires io.vidocq.runtime.extensions.jakartaee.web.vaadin;`
+(`vidocq extension add vaadin` writes both). It changes nothing under the other goals. See
+[An app shell in a jlink image](https://doc.vidocq.dev/vidocq/dev/vaadin.html#jlink-app-shell).
 
 ## The `jlink` profile
 
 `jlink` accepts named Java modules only, and no Vaadin jar is one. The `jlink` profile adds `vauban:modularize`, which
-gives every jar of the closure a `module-info`, and sets two flags for two Vaadin layouts the module system does not
+gives every jar of the closure a `module-info` (the parent manages the plugin's version), and sets two flags for two Vaadin layouts the module system does not
 allow:
 
 - `vidocq.jlink.mergeSharedResources`: `flow-server` and `flow-react` both ship files under
