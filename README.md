@@ -11,7 +11,10 @@ documentation.
 
 - JDK 25 (`sdk env` picks it up from `.sdkmanrc`).
 - Network access to Maven Central: Vidocq 0.4.0 is not released yet, so the build uses the snapshot builds from
-  Central's snapshot repository.
+  Central's snapshot repository. `pom.xml` declares it under `<repositories>` and under `<pluginRepositories>`: the
+  Vidocq plugin is a build extension, which Maven resolves from the plugin repositories only, so a build with the
+  first block alone stops with _Unresolveable build extension_ on a machine that has not cached the plugin. Snapshots
+  only: a release comes from Maven Central.
 
 No Node: the frontend comes precompiled from `vaadin-prod-bundle`, and the application runs in Vaadin's production mode.
 
