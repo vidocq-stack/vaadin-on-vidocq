@@ -20,8 +20,8 @@ No Node: the frontend comes precompiled from `vaadin-prod-bundle`, and the appli
 
 ## Run it
 
-Build once with `./mvnw clean package` first: `vidocq:dev` and `vidocq:run` neither build the frontend nor process the
-Vaadin jars, so from an empty `target/` the page answers 404 (`dev`) or 500 (`run`).
+Both `vidocq:dev` and `vidocq:run` work from an empty `target/`: `build-frontend` is bound to `process-classes`, and
+`vidocq:dev` builds the project first (`mvn process-classes`) when `target/classes` is empty, and says so.
 
 | Goal | Command | Then |
 |---|---|---|
