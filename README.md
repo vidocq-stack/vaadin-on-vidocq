@@ -2,7 +2,7 @@
 
 A [Vaadin Flow](https://vaadin.com/flow) application running on the [Vidocq](https://vidocq.dev) runtime, with Foy,
 Vidocq's Servlet 6.1 container, as its servlet engine. One view, no workaround class, and four ways to run it: in
-development, as a packaged distribution, and as a self-contained `jlink` image with its own JDK.
+development, as in production, as a packaged distribution, and as a self-contained `jlink` image with its own JDK.
 
 Everything below is explained in the [Vaadin guide](https://doc.vidocq.dev/vidocq/dev/vaadin.html) of the Vidocq
 documentation.
@@ -10,27 +10,35 @@ documentation.
 ## Requirements
 
 - JDK 25 (`sdk env` picks it up from `.sdkmanrc`).
-- Network access to Maven Central: Vidocq 0.4.0 is not released yet, so the build uses the snapshot builds from
-  Central's snapshot repository. `pom.xml` declares it under `<repositories>` and under `<pluginRepositories>`: the
-  Vidocq plugin is a build extension, which Maven resolves from the plugin repositories only, so a build with the
-  first block alone stops with _Unresolveable build extension_ on a machine that has not cached the plugin. Snapshots
-  only: a release comes from Maven Central.
+- Network access to Maven Central and to `https://maven.vidocq.dev/snapshots/`: Vidocq 0.4.0 is not released yet, so
+  the build uses the snapshot builds of Vidocq's own repository (`maven.bak.vidocq.dev` is its mirror). `pom.xml`
+  declares them under `<repositories>` and under `<pluginRepositories>`: the Vidocq plugin is a build extension,
+  which Maven resolves from the plugin repositories only, so a build with the first block alone stops with
+  _Unresolveable build extension_ on a machine that has not cached the plugin. Snapshots only: a release comes from
+  Maven Central.
 
 No Node: the frontend comes precompiled from `vaadin-prod-bundle`, and the application runs in Vaadin's production mode.
 
 ## Run it
 
-Build once with `./mvnw clean package` first: `vidocq:dev` and `vidocq:run` neither build the frontend nor process the
-Vaadin jars, so from an empty `target/` the page answers 404 (`dev`) or 500 (`run`).
+Each command works from a fresh clone: `vidocq:dev` and `vidocq:run` compile the project and build the frontend first.
 
 | Goal | Command | Then |
 |---|---|---|
 | Development, reloaded on every change | `./mvnw vidocq:dev` | http://localhost:8080 |
 | Run, as in production | `./mvnw vidocq:run` | http://localhost:8080 |
-| Packaged distribution | `./mvnw clean package vidocq:package` | `target/vaadin-on-vidocq-*/bin/vaadin-on-vidocq.sh` |
+| Packaged distribution | `./mvnw clean package` | `target/vaadin-on-vidocq-*/bin/vaadin-on-vidocq.sh` |
 | Self-contained image | `./mvnw -Pjlink clean package vidocq:jlink` | `JDK_JAVA_OPTIONS=-Dvaadin.productionMode=true target/dist/bin/vaadin-on-vidocq` |
 
 The port is set in `src/main/resources/vidocq.properties`.
+
+With the [Vidocq CLI](https://doc.vidocq.dev/vidocq/dev/modules/vidocq-runtime-cli.html), `vidocq dev`, `vidocq start`
+and `vidocq build` run the first three; `vidocq dev --port 8081` moves the port. The image needs the `jlink`
+profile, which the CLI cannot pass: use the Maven command. For IntelliJ, `vidocq idea` writes `(dev)`, `(run)` and
+`(debug)` run configurations into `.run/`.
+
+The distribution is also zipped as `target/vaadin-on-vidocq-*-dist.zip`. Unzipped elsewhere, its launcher has lost its
+execute bit (Vidocq BUG-20261116-02): start it with `sh bin/vaadin-on-vidocq.sh` until a Vidocq snapshot fixes it.
 
 ## What makes it work
 
@@ -72,5 +80,9 @@ What only Vaadin can change is collected in
 
 ## Known limits
 
-Only production mode was checked, on this one view: the page and its frontend bundles. Push, websockets and larger
-applications were not exercised yet. Feedback is welcome.
+- Vaadin runs in production mode only, with the precompiled bundle: development mode, with its Vite dev server, was
+  not tried. A hot reload under `vidocq:dev` starts a new session: an open page reloads on its next request.
+- Push works with `@Push(transport = Transport.LONG_POLLING)` only: Foy implements no Jakarta WebSocket
+  ([Vidocq/vidocq#65](https://codefloe.com/Vidocq/vidocq/issues/65)). See
+  [Push](https://doc.vidocq.dev/vidocq/dev/vaadin.html#push) in the Vaadin guide.
+- Larger applications were not exercised yet. Feedback is welcome.
