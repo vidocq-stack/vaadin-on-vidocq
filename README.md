@@ -34,9 +34,10 @@ The port is set in `src/main/resources/vidocq.properties`.
 
 ## What makes it work
 
-- **`vidocq.app.layer=all`** (in `pom.xml`). Vaadin looks the application's resources up, `index.html` first, through
-  the class loader that loaded Vaadin. With this setting, the Vaadin jars share the application's layer, as
-  `WEB-INF/lib` does in a servlet container. Without it, every request answers 500 with *Unable to find index.html*.
+- **The Vaadin jars share the application's layer**, as `WEB-INF/lib` does in a servlet container. Vaadin looks the
+  application's resources up, `index.html` first, through the class loader that loaded Vaadin. Nothing to set: since
+  Vidocq 0.4.0, `vidocq:run` and the `vidocq:package` distribution put every dependency outside the runtime in the
+  application's layer (`vidocq.app.layer=all` is the default). A `jlink` image has one layer, the JVM's own.
 - **The `generate` execution** of `vidocq-runtime-maven-plugin`. The plugin puts Foy's annotation processors on the
   compiler's path by itself, and `vidocq:generate` also runs them over `flow-server` and `atmosphere-runtime`, so
   Vaadin's `@WebListener` and `ServletContainerInitializer` classes are registered. The startup report shows

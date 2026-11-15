@@ -21,9 +21,6 @@
         <vaadin.version>25.3.2</vaadin.version>
         <!-- The application's Java module: the runtime's own main boots it, no main class needed. -->
         <vidocq.mainModule>io.vidocq.tools.vaadin</vidocq.mainModule>
-        <!-- Vaadin looks the application's resources up through its own class loader: it must share the
-             application's layer. -->
-        <vidocq.app.layer>all</vidocq.app.layer>
         <!-- Production mode, with the precompiled frontend of vaadin-prod-bundle: no Node needed. -->
         <vidocq.dev.jvmArgs>-Dvaadin.productionMode=true</vidocq.dev.jvmArgs>
         <vidocq.run.jvmArgs>-Dvaadin.productionMode=true</vidocq.run.jvmArgs>
