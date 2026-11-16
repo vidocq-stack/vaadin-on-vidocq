@@ -33,9 +33,9 @@ Each command works from a fresh clone: `vidocq:dev` and `vidocq:run` compile the
 The port is set in `src/main/resources/vidocq.properties`.
 
 With the [Vidocq CLI](https://doc.vidocq.dev/vidocq/dev/modules/vidocq-runtime-cli.html), `vidocq dev`, `vidocq start`
-and `vidocq build` run the first three; `vidocq dev --port 8081` moves the port. The image needs the `jlink`
-profile, which the CLI cannot pass: use the Maven command. For IntelliJ, `vidocq idea` writes `(dev)`, `(run)` and
-`(debug)` run configurations into `.run/`.
+and `vidocq build` run the first three, and `vidocq build jlink -- -Pjlink` the image: what follows `--` goes to Maven.
+`vidocq dev --port 8081` moves the port. For IntelliJ, `vidocq idea` writes `(dev)`, `(run)` and `(debug)` run
+configurations into `.run/`.
 
 The distribution is also zipped as `target/vaadin-on-vidocq-*-dist.zip`; unzipped elsewhere, it starts with
 `bin/vaadin-on-vidocq.sh`. The ZIP keeps the launcher's execute bit from Vidocq `0.4.0-SNAPSHOT` build
