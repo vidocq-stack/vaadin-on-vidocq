@@ -37,8 +37,9 @@ and `vidocq build` run the first three; `vidocq dev --port 8081` moves the port.
 profile, which the CLI cannot pass: use the Maven command. For IntelliJ, `vidocq idea` writes `(dev)`, `(run)` and
 `(debug)` run configurations into `.run/`.
 
-The distribution is also zipped as `target/vaadin-on-vidocq-*-dist.zip`. Unzipped elsewhere, its launcher has lost its
-execute bit (Vidocq BUG-20261116-02): start it with `sh bin/vaadin-on-vidocq.sh` until a Vidocq snapshot fixes it.
+The distribution is also zipped as `target/vaadin-on-vidocq-*-dist.zip`; unzipped elsewhere, it starts with
+`bin/vaadin-on-vidocq.sh`. The ZIP keeps the launcher's execute bit from Vidocq `0.4.0-SNAPSHOT` build
+`0.4.0-20261116.045035-145` on: if your local repository holds an older snapshot, build with `./mvnw -U clean package`.
 
 ## What makes it work
 
