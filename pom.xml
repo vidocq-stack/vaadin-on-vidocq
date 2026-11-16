@@ -48,6 +48,11 @@
             <groupId>io.vidocq.runtime.extensions.jakartaee.web</groupId>
             <artifactId>vidocq-runtime-foy-servlet-extension</artifactId>
         </dependency>
+        <!-- What Vaadin needs from Vidocq itself: see "The Vaadin extension" in the README. -->
+        <dependency>
+            <groupId>io.vidocq.runtime.extensions.jakartaee.web</groupId>
+            <artifactId>vidocq-runtime-vaadin-extension</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>

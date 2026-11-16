@@ -56,13 +56,22 @@ The distribution is also zipped as `target/vaadin-on-vidocq-*-dist.zip`; unzippe
 - **No main class.** The runtime's own main boots the module that `vidocq.mainModule` names, under every goal down to
   the `jlink` image.
 
-## An app shell
+## The Vaadin extension
 
-A theme, stylesheets or PWA settings mean an `AppShellConfigurator`. In a `jlink` image, Vaadin looks it up through
-`ServiceLoader` from `flow.server`, which the image cannot allow: the first request then never answers. Add
-`vidocq-runtime-vaadin-extension` and `requires io.vidocq.runtime.extensions.jakartaee.web.vaadin;`
-(`vidocq extension add vaadin` writes both). It changes nothing under the other goals. See
-[An app shell in a jlink image](https://doc.vidocq.dev/vidocq/dev/vaadin.html#jlink-app-shell).
+`pom.xml` declares `vidocq-runtime-vaadin-extension`, and `module-info.java` requires
+`io.vidocq.runtime.extensions.jakartaee.web.vaadin` (`vidocq extension add vaadin` writes both). It is what Vaadin
+needs from Vidocq itself:
+
+- **Under `vidocq:dev`**, it tells which Vaadin code runs once at start: the Vaadin CDI scopes, `@PreserveOnRefresh`,
+  a `VaadinServiceInitListener`. `vidocq:dev` reads it to say why each change reloads the application, such as
+  `Hot reload - restarting on a fresh application layer: MainView gained a method lambda$new$da5c5043$1`, and
+  reloads nothing when a change compiles to the same classes, such as a comment.
+- **An app shell in a `jlink` image.** A theme, stylesheets or PWA settings mean an `AppShellConfigurator`. In a
+  `jlink` image, Vaadin looks it up through `ServiceLoader` from `flow.server`, which the image cannot allow: the
+  first request then never answers. The extension's lookup does it instead. See
+  [An app shell in a jlink image](https://doc.vidocq.dev/vidocq/dev/vaadin.html#jlink-app-shell).
+- **Push.** It brings Jakarta WebSocket through Foy, so `@Push` takes the WebSocket transports. See
+  [Push](https://doc.vidocq.dev/vidocq/dev/vaadin.html#push) in the Vaadin guide.
 
 ## The `jlink` profile
 
@@ -83,7 +92,4 @@ What only Vaadin can change is collected in
 
 - Vaadin runs in production mode only, with the precompiled bundle: development mode, with its Vite dev server, was
   not tried. A hot reload under `vidocq:dev` starts a new session: an open page reloads on its next request.
-- Push works with `@Push(transport = Transport.LONG_POLLING)` only: Foy implements no Jakarta WebSocket
-  ([Vidocq/vidocq#65](https://codefloe.com/Vidocq/vidocq/issues/65)). See
-  [Push](https://doc.vidocq.dev/vidocq/dev/vaadin.html#push) in the Vaadin guide.
 - Larger applications were not exercised yet. Feedback is welcome.
