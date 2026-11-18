@@ -91,5 +91,11 @@ What only Vaadin can change is collected in
 ## Known limits
 
 - Vaadin runs in production mode only, with the precompiled bundle: development mode, with its Vite dev server, was
-  not tried. A hot reload under `vidocq:dev` starts a new session: an open page reloads on its next request.
+  not tried.
+- A hot reload under `vidocq:dev` keeps the open page's session and what it shows, its `@SessionScoped` beans
+  included; a method added to a view or to a session bean keeps it too. A `serialVersionUID` declared, removed or given
+  another value drops it, as do the other cases the
+  [Vaadin guide](https://doc.vidocq.dev/vidocq/dev/vaadin.html#dev-and-run) lists: the page then reloads on its next
+  request with a new session, and the `vidocq:dev` log says why. A kept page shows the view its old code built: a
+  listener a view's constructor now adds is there once the page reloads.
 - Larger applications were not exercised yet. Feedback is welcome.
