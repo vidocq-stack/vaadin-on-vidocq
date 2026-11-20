@@ -19,6 +19,8 @@
 
     <properties>
         <vaadin.version>25.3.2</vaadin.version>
+        <!-- The Vaadin extension is released apart from the runtime, so the parent does not manage it. -->
+        <vaadin-extension.version>0.1.0-SNAPSHOT</vaadin-extension.version>
         <!-- The application's Java module: the runtime's own main boots it, no main class needed. -->
         <vidocq.mainModule>io.vidocq.tools.vaadin</vidocq.mainModule>
         <!-- Production mode, with the precompiled frontend of vaadin-prod-bundle: no Node needed. -->
@@ -50,8 +52,9 @@
         </dependency>
         <!-- What Vaadin needs from Vidocq itself: see "The Vaadin extension" in the README. -->
         <dependency>
-            <groupId>io.vidocq.runtime.extensions.jakartaee.web</groupId>
+            <groupId>io.vidocq.vcu.vaadin</groupId>
             <artifactId>vidocq-runtime-vaadin-extension</artifactId>
+            <version>${vaadin-extension.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
